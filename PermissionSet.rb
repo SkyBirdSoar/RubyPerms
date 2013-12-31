@@ -13,13 +13,9 @@ module PermissionSet
 
   # @!attribute [r] permissions
   #   A list of permissions <user> has
-  # @!attribute [r] last_modified
-  #   The time permissions was last modified
-  # @!attribute [r] last_
-  #   Corresponding to cache_
-  # @!attribute [r] cache_
+  # @!attribute [r] cache
   #   Caches method returns like sort, clean etc to not waste system resources
-  attr_reader :permissions, :last_modified, :last_, :cache_, :nick
+  attr_reader :permissions, :cache, :nick
 
   # @param permissions [Array<Permission, PermissionGroup>]
   # @note permissions will be sorted immediately.
@@ -27,9 +23,7 @@ module PermissionSet
   def initialize(nick, permissions)
     @nick = nick
     @permissions = permissions.select { |x| x.class == Permission || x.class == PermissionGroup }
-    @last_modified = Time.now
-    @last_ = {}
-    @cache_ = {}
+    @cache = {}
     sort!
   end
 
@@ -446,19 +440,11 @@ module PermissionSet
   # Remove duplicates
   # @return [Array<Permission, PermissionGroup>] The cleaned self
   def clean
-    if @cache_.key?(:cleaned)
-      if @last_[:cleaned] > @last_modified
-        @cache_[:cleaned]
-      else
-        clean = clean_priv
-        @last_[:cleaned] = Time.now
-        @cache_[:cleaned] = clean
-        clean
-      end
+    if @cache.key?(:cleaned)
+      @cache[:cleaned]
     else
       clean = clean_priv
-      @last_[:cleaned] = Time.now
-      @cache_[:cleaned] = clean
+      @cache[:cleaned] = clean
       clean
     end
   end
@@ -494,19 +480,11 @@ module PermissionSet
   # - Groups last
   # @return [Array<Permission, PermissionGroup>]
   def sort
-    if @cache_.key?(:sorted)
-      if @last_[:sorted] > @last_modified
-        @cache_[:sorted]
-      else
-        sort = sorting
-        @last_[:sorted] = Time.now
-        @cache_[:sorted] = sort
-        sort
-      end
+    if @cache.key?(:sorted)
+      @cache[:sorted]
     else
       sort = sorting
-      @last_[:sorted] = Time.now
-      @cache_[:sorted] = sort
+      @cache[:sorted] = sort
       sort
     end
   end
@@ -562,19 +540,11 @@ module PermissionSet
   # (same as !permission)
   # @return [Array<Permission, PermissionGroup>]
   def inverse
-    if @cache_.key?(:inversed)
-      if @last_[:inversed] > @last_modified
-        @cache_[:inversed]
-      else
-        inverse = inverse_all
-        @last_[:inversed] = Time.now
-        @cache_[:inversed] = inverse
-        inverse
-      end
+    if @cache.key?(:inversed)
+      @cache[:inversed]
     else
       inverse = inverse_all
-      @last_[:inversed] = Time.now
-      @cache_[:inversed] = inverse
+      @cache[:inversed] = inverse
       inverse
     end
   end
@@ -703,25 +673,14 @@ module PermissionSet
   # All Permissions will be negated
   # @return [Array<Permission, PermissionGroup>]
   def negate
-    if @cache_.key?(:negated)
-      if @last_[:negated] > @last_modified
-        @cache_[:negated]
-      else
-        negated = []
-        @permissions.each do |permission|
-          negated << permission.negate
-        end
-        @last_[:negated] = Time.now
-        @cache_[:negated] = negated
-        negated
-      end
+    if @cache.key?(:negated)
+      @cache[:negated]
     else
       negated = []
       @permissions.each do |permission|
         negated << permission.negate
       end
-      @last_[:negated] = Time.now
-      @cache_[:negated] = negated
+      @cache[:negated] = negated
       negated
     end
   end
@@ -750,25 +709,14 @@ module PermissionSet
   # All Permissions will be un-negated
   # @return [Array<Permission, PermissionGroup>]
   def un_negate
-    if @cache_.key?(:unnegated)
-      if @last_[:unnegated] > @last_modified
-        @cache_[:unnegated]
-      else
-        unnegated = []
-        @permissions.each do |permission|
-          unnegated << permission.negate(false)
-        end
-        @last_[:unnegated] = Time.now
-        @cache_[:unnegated] = unnegated
-        unnegated
-      end
+    if @cache.key?(:unnegated)
+      @cache[:unnegated]
     else
       unnegated = []
       @permissions.each do |permission|
         unnegated << permission.negate(false)
       end
-      @last_[:unnegated] = Time.now
-      @cache_[:unnegated] = unnegated
+      @cache[:unnegated] = unnegated
       unnegated
     end
   end
@@ -799,23 +747,13 @@ module PermissionSet
   #   as it caches the result
   # @return [Array<Permission, PermissionGroup>]
   def negated
-    if @cache_.key?(:negated_list)
-      if @last_[:negated_list] > @last_modified
-        @cache_[:negated_list]
-      else
-        negated_list = @permissions.select do |permission|
-          permission.negated?
-        end
-        @last_[:negated_list] = Time.now
-        @cache_[:negated_list] = negated_list
-        negated_list
-      end
+    if @cache.key?(:negated_list)
+      @cache[:negated_list]
     else
       negated_list = @permissions.select do |permission|
         permission.negated?
       end
-      @last_[:negated_list] = Time.now
-      @cache_[:negated_list] = negated_list
+      @cache[:negated_list] = negated_list
       negated_list
     end
   end
@@ -825,23 +763,13 @@ module PermissionSet
   #   as it caches the result
   # @return [Array<Permission, PermissionGroup>]
   def un_negated
-    if @cache_.key?(:unnegated_list)
-      if @last_[:unnegated_list] > @last_modified
-        @cache_[:unnegated_list]
-      else
-        unnegated_list = @permissions.select do |permission|
-          !permission.negated?
-        end
-        @last_[:unnegated_list] = Time.now
-        @cache_[:unnegated_list] = unnegated_list
-        unnegated_list
-      end
+    if @cache.key?(:unnegated_list)
+      @cache[:unnegated_list]
     else
       unnegated_list = @permissions.select do |permission|
         !permission.negated?
       end
-      @last_[:unnegated_list] = Time.now
-      @cache_[:unnegated_list] = unnegated_list
+      @cache[:unnegated_list] = unnegated_list
       unnegated_list
     end
   end
@@ -849,22 +777,8 @@ module PermissionSet
   # Turn everything into PermissionGroup
   # @return [Array<PermissionGroup>]
   def force_group
-    if @cache_.key?(:force_group)
-      if @last_[:force_group] > @last_modified
-        @cache_[:force_group]
-      else
-        force_group = []
-        @permissions.each do |permission|
-          if permission.class == Permission
-            force_group << permission.broaden
-          else
-            force_group << permission
-          end
-        end
-        @last_[:force_group] = Time.now
-        @cache_[:force_group] = force_group
-        force_group
-      end
+    if @cache.key?(:force_group)
+      @cache[:force_group]
     else
       force_group = []
       @permissions.each do |permission|
@@ -874,8 +788,7 @@ module PermissionSet
           force_group << permission
         end
       end
-      @last_[:force_group] = Time.now
-      @cache_[:force_group] = force_group
+      @cache[:force_group] = force_group
       force_group
     end
   end
@@ -907,23 +820,13 @@ module PermissionSet
   #   as it caches the result
   # @return [Array<Permission, PermissionGroup>]
   def get_groups
-    if @cache_.key?(:get_groups)
-      if @last_[:get_groups] > @last_modified
-        @cache_[:get_groups]
-      else
-        get_groups = @permissions.select do |permission|
-          permission.class == PermissionGroup
-        end
-        @last_[:get_groups] = Time.now
-        @cache_[:get_groups] = get_groups
-        get_groups
-      end
+    if @cache.key?(:get_groups)
+      @cache[:get_groups]
     else
       get_groups = @permissions.select do |permission|
         permission.class == PermissionGroup
       end
-      @last_[:get_groups] = Time.now
-      @cache_[:get_groups] = get_groups
+      @cache[:get_groups] = get_groups
       get_groups
     end
   end
@@ -933,23 +836,13 @@ module PermissionSet
   #   as it caches the result
   # @return [Array<Permission, PermissionGroup>]
   def get_non_groups
-    if @cache_.key?(:get_non_groups)
-      if @last_[:get_non_groups] > @last_modified
-        @cache_[:get_non_groups]
-      else
-        get_non_groups = @permissions.select do |permission|
-          permission.class == Permission
-        end
-        @last_[:get_non_groups] = Time.now
-        @cache_[:get_non_groups] = get_non_groups
-        get_non_groups
-      end
+    if @cache.key?(:get_non_groups)
+      @cache[:get_non_groups]
     else
       get_non_groups = @permissions.select do |permission|
         permission.class == Permission
       end
-      @last_[:get_non_groups] = Time.now
-      @cache_[:get_non_groups] = get_non_groups
+      @cache[:get_non_groups] = get_non_groups
       get_non_groups
     end
   end
@@ -994,13 +887,12 @@ module PermissionSet
   end
 
   def reset_cache!
-    @last_.clear
-    @cache_.clear
+    @cache.clear
   end
 
   private
   def update(*args)
-    @last_modified = Time.now
+    reset_cache!
     changed
     notify_observers(*args)
     @last_modified
