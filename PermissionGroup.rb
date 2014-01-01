@@ -173,9 +173,9 @@ class PermissionGroup
       negated = PermissionUtils.negated?(string)
       case
       when @negated && negated
-        string.include?(@permission.chomp('.*'))
+        string.include?(@permission.chomp('.*')) && string.start_with?(@nodes[0])
       when !@negated && !negated
-        string.include?(@permission.chomp('.*'))
+        string.include?(@permission.chomp('.*')) && string.start_with?(@nodes[0])
       when @negated && !negated
         false
       when !@negated && negated
@@ -236,5 +236,9 @@ class PermissionGroup
 
   def to_str
     @negated ? "-#{@permission}" : @permission
+  end
+
+  def to_s
+    to_str
   end
 end

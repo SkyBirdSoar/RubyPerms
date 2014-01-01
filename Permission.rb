@@ -74,11 +74,11 @@ class Permission
       when @negated && object.negated
         -1
       when @negated && !object.negated
-        1
+        -1
       when !@negated && !object.negated
         -1
       when !@negated && object.negated
-        -1
+        1
       end
     else
       nil
@@ -177,5 +177,9 @@ class Permission
 
   def to_str
     @negated ? "-#{@permission}" : @permission
+  end
+
+  def to_s
+    to_str
   end
 end
