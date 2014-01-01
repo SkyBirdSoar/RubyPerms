@@ -154,6 +154,17 @@ class PermissionCluster
   end
   alias_method :inverse, :'!'
 
+  def ==(object)
+    case object
+    when String
+      @permission == object
+    when PermissionCluster
+      (@negated == object.negated) && (@permission == object.permission) && (@children == object.children)
+    else
+      nil
+    end
+  end
+
   # Inverts @negated.
   # @return [self]
   def inverse!
