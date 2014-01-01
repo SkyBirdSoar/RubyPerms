@@ -78,6 +78,7 @@ module Permissible
         when PermissionGroup
           if x == permission || x.include?(permission)
             return x.negated ? false : true
+          end
         when PermissionCluster
           if x == permission || x.has_child?(permission)
             return x.negated ? false : true
