@@ -73,9 +73,6 @@ class PermissionUtils
   # @return (Integer) on whether string is included in another_string
   #   |-1| - no match, |0| - exact match, |1, (Symbol) :left or :right| - included
   # @return (nil) if either string or another_string is invalid.
-  #
-  # @see valid?
-  # @see include?
   def self.compare(string, another_string)
     if self.valid?(string) && self.valid?(another_string)
       # Determine mode of comparision
