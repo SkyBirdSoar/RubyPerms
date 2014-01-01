@@ -18,7 +18,7 @@ class Permission
   def initialize(string)
     case string
     when String
-      fail("Invalid permission string.") if string.end_with?(?*) || string.include?('..')
+      fail("Invalid permission string.") if string.end_with?('.*') || string.include?('..')
       string = string.downcase
       @negated = PermissionUtils.negated?(string)
       @permission = @negated ? string.sub('-', '') : string
