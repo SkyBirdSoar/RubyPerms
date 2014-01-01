@@ -95,7 +95,7 @@ class Permission
   def broaden(depth = 1)
     if depth == 1
       temp = @permission.chomp(".#{@nodes[-1]}")
-      temp = temp + ".*"
+      temp << ".*"
       if @negated
         temp = "-#{temp}"
       end
