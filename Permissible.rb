@@ -69,23 +69,44 @@ module Permissible
   def has_permission?(permission)
     case permission
     when String
-      @permissions.each do |x|
+      permissions = @permissions.select do |x|
         case x.class
         when Permission
           if x == permission
-            return x.negated ? false : true
+            true
           end
         when PermissionGroup
           if x == permission || x.include?(permission)
-            return x.negated ? false : true
+            true
           end
         when PermissionCluster
           if x == permission || x.has_child?(permission)
-            return x.negated ? false : true
+            true
           end
         end
+        false
       end
-      false
+      len = 0
+      longest = false
+      permissions.each do |a|
+        if a.class == PermissionGroup
+          if (a.nodes.length - 1) > len
+            len = a.nodes.length - 1
+            longest = a
+          end
+        elsif a.class == PermissionCluster
+          b = a.get_child(permission)
+          if b.nodes.length > len
+            len = b.nodes.length
+            longest = b
+          end
+        else
+          # Obviously the permission should have priority
+          len = a.nodes.length
+          longest = a
+        end
+      end
+      longest ? longest.negated? : false
     when Permission || PermissionGroup || PermissionCluster
       has_permission?(permission.permission)
     else

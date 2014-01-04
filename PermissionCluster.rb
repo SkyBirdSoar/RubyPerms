@@ -100,6 +100,24 @@ class PermissionCluster
     end
   end
 
+  def get_child(child)
+    case child
+    when String
+      @children.select do |x|
+        case x
+        when Permission
+          x == child
+        when PermissionGroup
+          x == child || x.include?(child)
+        end
+      end
+    when Permission || PermissionGroup
+      get_child(child.permission)
+    else
+      false
+    end
+  end
+
   # Creates a new PermissionCluster object with the same permission
   # and children with @negated as true/false
   #
