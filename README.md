@@ -3,7 +3,7 @@ RubyPerms
 
 An implementation (sort of) of Bukkit's SuperPerms in Ruby.
 
-## WARNING
+#### WARNING
 > This is not perfect, the permissions checking is flawed, avoid use.
 
 I express gratitude to the following people:
