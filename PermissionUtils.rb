@@ -1,55 +1,10 @@
-require './plugins/ExtensionManager/Permissions/Permission'
-require './plugins/ExtensionManager/Permissions/PermissionGroup'
+require File.join(File.expand_path(File.dirname(__FILE__)), 'Permission')
+require File.join(File.expand_path(File.dirname(__FILE__)), 'PermissionGroup')
 
-# Utility class for handling permission strings.
-# @author SkyBirdSoar
+# Used for handling Permission and PermissionGroup
+# strings for operations such as comparing and such.
 class PermissionUtils
-  # Check if a string is a valid {Permission#valid? Permission} or {PermissionGroup#valid? PermissionGroup} string
-  #
-  # @param string [String] The string to check for validity
-  # @param syntax [Symbol] Use :Permission to
-  #   validate the string as a {Permission} string or :PermissionGroup
-  #   for {PermissionGroup} Leave opts empty to check if its valid for
-  #   either {Permission} or {PermissionGroup}
-  #
-  # @example
-  #   PermissionUtils.valid?('a.b.c.d.e')
-  #   #=> true
-  #
-  #   PermissionUtils.valid?('a.b.c.d.*')
-  #   #=> true
-  #
-  #   PermissionUtils.valid?('a.b.c.d.*', :Permission)
-  #   #=> false
-  #
-  #   PermissionUtils.valid?('a.b.c.d.e', :PermissionGroup)
-  #   #=> false
-  #
-  #   PermissionUtils.valid?('a.b.c.d.e', :permission) # Has to be properly capitalized.
-  #   #=> nil
-  #
-  # @return [Boolean] on whether string is a valid {Permission#valid? Permission}
-  #   or {PermissionGroup#valid? PermissionGroup} string
-  # @return [nil] if syntax is not :Permission or :PermissionGroup
-  #
-  # @see Permission
-  # @see PermissionGroup
-  def self.valid?(string, syntax = nil)
-    if syntax == nil
-      Permission.valid?(string) || PermissionGroup.valid?(string)
-    else
-      case syntax
-      when :Permission || 'Permission'
-        Permission.valid?(string)
-      when :PermissionGroup || 'PermissionGroup'
-        PermissionGroup.valid?(string)
-      else
-        nil
-      end
-    end
-  end
-
-  # Check if a string is a negated permission.
+  # Check if a string is negated.
   #
   # @param string [String] The permission string to check.
   #
@@ -67,20 +22,12 @@ class PermissionUtils
   #   #=> nil
   #
   # @return [Boolean] on whether string is negated.
-  # @return [nil] if string is not valid.
-  #
-  # @see valid?
-  # @see allowed?
   def self.negated?(string)
-    if self.valid?(string)
-      return true if string.start_with?(?-)
-      false
-    else
-      nil
-    end
+    return true if string.start_with?(?-)
+    false
   end
 
-  # Check if a string is a negated permission.
+  # Opposite of {::negated?}.
   #
   # @param string [String] The permission string to check.
   #
@@ -98,133 +45,11 @@ class PermissionUtils
   #   #=> nil
   #
   # @return [Boolean] on whether you should grant permission based on string.
-  # @return [nil] if string is not valid.
-  #
-  # @see valid?
-  # @see negated?
   def self.allowed?(string)
-    if self.valid?(string)
-      return false if string.start_with?(?-)
-      true
-    else
-      nil
-    end
+    !self.negated?(string)
   end
 
-  # Returns a (negated) string
-  #
-  # @param string [String] The string to (un)negate.
-  # @param negate [Boolean] true - negate |
-  #                         false - unnegate
-  #
-  # @example
-  #   PermissionUtils.negate('a.b.c.d')
-  #   #=> "-a.b.c.d"
-  #
-  #   PermissionUtils.negate('a.b.c.d', false)
-  #   #=> "a.b.c.d"
-  #
-  #   PermissionUtils.negate('-a.b.c.d', false)
-  #   #=> "a.b.c.d"
-  #
-  # @return [String] the (negated) string
-  # @return [nil] if string isn't valid
-  #
-  # @see valid?
-  # @see negate!
-  def self.negate(string, negate = true)
-    if self.valid?(string)
-      case negate
-      when true
-        return string if self.negated?(string)
-        return "-#{string}"
-      when false
-        return string unless self.negated?(string)
-        return string.sub('-', '')
-      end
-    else
-      nil
-    end
-  end
-
-  # Returns a (negated) string and modifies string in place
-  #
-  # @param string [String] The string to (un)negate.
-  # @param negate [Boolean] true - negate |
-  #                         false - unnegate
-  #
-  # @example
-  #   string = 'a.b.c'
-  #   #=> 'a.b.c'
-  #
-  #   PermissionUtils.negate!(string)
-  #   #=> "-a.b.c"
-  #
-  #   string
-  #   #=> '-a.b.c'
-  #
-  # @return [String] the (negated) string
-  # @return [nil] if string isn't valid
-  #
-  # @see valid?
-  # @see negate
-  def self.negate!(string, negate = true)
-    if self.valid?(string)
-      case negate
-      when true
-        return string if self.negated?(string)
-        return string.prepend('-')
-      when false
-        return string unless self.negated?(string)
-        return string.sub!('-', '')
-      end
-    else
-      nil
-    end
-  end
-
-  # Check if a Permission string is included in a PermissionGroup
-  #   string
-  #
-  # @param string [String] The Permission string to check
-  # @param string_group [String] The PermissionGroup to check against
-  #
-  # @example
-  #   PermissionUtils.include?('a.b.c.d.e', 'a.b.c.d.*')
-  #   #=> true
-  #
-  #   PermissionUtils.include?('a.b.c.d.e', 'a.*')
-  #   #=> true
-  #
-  #   PermissionUtils.include?('a.b.c.d.e', '-a.b.c.*')
-  #   #=> false
-  #
-  # @return (Boolean) on whether string is included in string_group
-  # @return (nil) if either string or string_group is invalid.
-  #
-  # @see valid?
-  # @see compare
-  def self.include?(string, string_group)
-    if self.valid?(string, :Permission) && self.valid?(string_group, :PermissionGroup)
-      return false if string == string_group.chomp('.*')
-      nodes = string.split(?.)
-      group_nodes = string_group.split(?.).each
-      nodes.each do |node|
-        begin
-          group_node = group_nodes.next
-          break if group_node != node
-          return true if group_node == node && group_nodes.peek == '*'
-        rescue StopIteration
-          return false
-        end
-      end
-      false
-    else
-      nil
-    end
-  end
-
-  # Compare 2 strings (each can be Permission/PermissionGroup)
+    # Compare 2 strings (each can be Permission/PermissionGroup)
   #
   # @param string [String]
   # @param another_string [String]
@@ -248,9 +73,6 @@ class PermissionUtils
   # @return (Integer) on whether string is included in another_string
   #   |-1| - no match, |0| - exact match, |1, (Symbol) :left or :right| - included
   # @return (nil) if either string or another_string is invalid.
-  #
-  # @see valid?
-  # @see include?
   def self.compare(string, another_string)
     if self.valid?(string) && self.valid?(another_string)
       # Determine mode of comparision
@@ -286,6 +108,17 @@ class PermissionUtils
       end
     else
       nil
+    end
+  end
+
+  # Creates a new Permission(Group) object based on a string
+  # @param string [String] The Permission(Group) string
+  # @return [Permission, PermissionGroup]
+  def self.create(string)
+    if string.end_with?('.*')
+      PermissionGroup.new(string)
+    else
+      Permission.new(string)
     end
   end
 end
