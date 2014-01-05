@@ -1,6 +1,6 @@
 require File.join(File.expand_path(File.dirname(__FILE__)), 'IPermission')
 class WildPermission < IPermission
-  def initialize(permission)
+  def initialize(permission, ext = false)
     return if handle_init(permission)
     case permission
     when String
@@ -8,6 +8,10 @@ class WildPermission < IPermission
       @permission = negated ? permission.sub(?-, '') : permission
       fail("Invalid permission string") unless self.valid?(@permission)
       @length = permission.split(?.).length
+      if ext
+        require File.join(File.expand_path(File.dirname(__FILE__)), 'WildExtension')
+        extend WildExtension
+      end
     when kind_of?(WildPermission)
       @negated = permission.negated
       @permission = permission.permission
