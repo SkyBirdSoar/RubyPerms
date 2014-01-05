@@ -4,9 +4,11 @@ module ClusterExtension
   def add_child(child)
     unless has_child?(child)
       begin
-        child = Permission.new(child).negated = x.negated
+        child = Permission.new(child)
+        child.negated = x.negated
       rescue RuntimeError
-        child = WildPermission.new(child) = x.negated
+        child = WildPermission.new(child)
+        child.negated = x.negated
       end
       @children << child
     end
