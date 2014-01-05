@@ -4,12 +4,18 @@ module PermissionExtension
   include Negatable
   include Enumerable
   include Comparable
+
+  def [](index)
+    @nodes ||= @permission.split(?.)
+    @nodes[index]
+  end
+
   def broaden(depth = 1)
   	case depth
     when 0
       nil
     when 1
-      temp = @permission.chomp(".#{@nodes ||= @permission.split(?.)[-1]}") << ".*"
+      temp = @permission.chomp(".#{(@nodes ||= @permission.split(?.))[-1]}") << ".*"
       temp = WildPermission.new(temp)
       temp.negated = @negated
       temp
@@ -64,7 +70,7 @@ module PermissionExtension
           1
         end
       end
-    when PermissionGroup
+    when WildPermission
       case
       when @negated && object.negated
         -1
