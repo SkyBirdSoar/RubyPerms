@@ -5,9 +5,11 @@ class ClusterHelper
   def self.add_child(cluster, child)
     unless self.has_child?(cluster, child)
       begin
-        child = Permission.new(child).negated = x.negated
+        child = Permission.new(child)
+        child.negated = x.negated
       rescue RuntimeError
-        child = WildPermission.new(child) = x.negated
+        child = WildPermission.new(child)
+        child.negated = x.negated
       end
       cluster.children << child
     end
